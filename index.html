@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W3QUIC Market Hub</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<style>
+body{font-family:Arial;background:#1a1a2e;color:white;text-align:center;padding:20px}
+.btn{background:#6c35de;color:white;padding:15px 30px;border:none;border-radius:10px;font-size:18px;cursor:pointer;margin:10px}
+h1{color:#f0c040}
+</style>
+</head>
+<body>
+<h1>🛒 W3QUIC Market Hub</h1>
+<p>Buy & Sell with Pi</p>
+<button class="btn" onclick="payWithPi()">💰 Pay 0.5 Pi</button>
+<script>
+Pi.init({version:"2.0",sandbox:true});
+function payWithPi(){
+Pi.authenticate(['payments'],function(auth){
+Pi.createPayment({amount:0.5,memo:"W3QUIC Market Hub",metadata:{}},
+{onReadyForServerApproval:function(id){alert('Payment ready!')},
+onReadyForServerCompletion:function(id,txid){alert('Payment complete!')},
+onCancel:function(id){alert('Cancelled')},
+onError:function(err){alert('Error')}});
+});}
+</script>
+</body>
+</html>
