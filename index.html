@@ -1,95 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>W3QUIC Market Hub</title>
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  <style>
-    body {
-      font-family: Arial;
-      background: #1a1a2e;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    .btn {
-      background: #6c35de;
-      color: white;
-      padding: 15px 30px;
-      border: none;
-      border-radius: 10px;
-      font-size: 18px;
-      cursor: pointer;
-      margin: 10px;
-    }
-    h1 { color: #f0c040; }
-  </style>
-</head>
-<body>
-  <h1>W3QUIC Market Hub</h1>
-  <p>Welcome to the future of Pi-powered marketplace</p>
+const SERVER = "https://6c221fbf-1413-4950-888a-74af38ebd4af-00-1liy2r0mshiq8.picard.replit.dev";
 
-  <button class="btn" onclick="initPi()">
-    Connect Pi Wallet
-  </button>
-
-  <button class="btn" onclick="payWithPi()">
-    Pay with Pi 
-  </button>
-
-  <div id="status" style="margin-top:20px; color:#f0c040;"></div>
-
-  <script>
-    // Initialize Pi SDK
-    function initPi() {
-      Pi.init({ version: "2.0", sandbox: true });
-      document.getElementById("status").innerText = 
-        "Pi SDK Initialized!";
-    }
-
-    // Pi Payment Function
-    function payWithPi() {
-      Pi.init({ version: "2.0", sandbox: true });
-      
-      Pi.authenticate(["payments"], onIncompletePaymentFound)
-        .then(function(auth) {
-          document.getElementById("status").innerText = 
-            "Authenticated: " + auth.user.username;
-          
-          // Create payment
-          Pi.createPayment({
-            amount: 1,
-            memo: "W3QUIC Market Hub Test",
-            metadata: { itemId: "test_001" }
-          }, {
-            onReadyForServerApproval: function(paymentId) {
-              document.getElementById("status").innerText = 
-                "Payment Ready: " + paymentId;
-            },
-            onReadyForServerCompletion: function(paymentId, txid) {
-              document.getElementById("status").innerText = 
-                "Payment Complete! TxID: " + txid;
-            },
-            onCancel: function(paymentId) {
-              document.getElementById("status").innerText = 
-                "Payment Cancelled";
-            },
-            onError: function(error, payment) {
-              document.getElementById("status").innerText = 
-                "Error: " + error.message;
-            }
-          });
-        })
-        .catch(function(err) {
-          document.getElementById("status").innerText = 
-            "Auth Error: " + err.message;
-        });
-    }
-
-    function onIncompletePaymentFound(payment) {
-      console.log("Incomplete payment:", payment);
-    }
-  </script>
-</body>
-</html>
+onReadyForServerApproval: async function(paymentId) {
+  await fetch(SERVER + '/api/payments/approve', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ paymentId })
+  });
+},
+onReadyForServerCompletion: async function(paymentId, txid) {
+  await fetch(SERVER + '/api/payments/complete', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ paymentId, txid })
+  });
+},
