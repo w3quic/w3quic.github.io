@@ -1,16 +1,67 @@
-const SERVER = "https://6c221fbf-1413-4950-888a-74af38ebd4af-00-1liy2r0mshiq8.picard.replit.dev";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W3QUIC Market Hub</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <style>
+    body { font-family: Arial; background: #1a1a2e; color: white; text-align: center; padding: 20px; }
+    .btn { background: #6c35de; color: white; padding: 15px 30px; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; margin: 10px; }
+    h1 { color: #f0c040; }
+    #status { margin-top: 20px; color: #f0c040; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>W3QUIC Market Hub</h1>
+  <p>Pi-powered Global Marketplace</p>
+  <button class="btn" onclick="payWithPi()">Pay 1π</button>
+  <div id="status"></div>
 
-onReadyForServerApproval: async function(paymentId) {
-  await fetch(SERVER + '/api/payments/approve', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ paymentId })
-  });
-},
-onReadyForServerCompletion: async function(paymentId, txid) {
-  await fetch(SERVER + '/api/payments/complete', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ paymentId, txid })
-  });
-},
+  <script>
+    const SERVER = "https://6c221fbf-1413-4950-888a-74af38ebd4af-00-1liy2r0mshiq8.picard.replit.dev";
+
+    Pi.init({ version: "2.0", sandbox: true });
+
+    function payWithPi() {
+      document.getElementById("status").innerText = "Connecting...";
+      
+      Pi.authenticate(["payments"], function(payment) {
+        console.log("Incomplete payment:", payment);
+      }).then(function(auth) {
+        document.getElementById("status").innerText = "Authenticated! Starting payment...";
+        
+        Pi.createPayment({
+          amount: 1,
+          memo: "W3QUIC Market Hub",
+          metadata: { itemId: "test_001" }
+        }, {
+          onReadyForServerApproval: async function(paymentId) {
+            document.getElementById("status").innerText = "Approving...";
+            await fetch(SERVER + '/api/payments/approve', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ paymentId })
+            });
+          },
+          onReadyForServerCompletion: async function(paymentId, txid) {
+            document.getElementById("status").innerText = "Completing...";
+            await fetch(SERVER + '/api/payments/complete', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ paymentId, txid })
+            });
+            document.getElementById("status").innerText = "✅ Payment Complete!";
+          },
+          onCancel: function(paymentId) {
+            document.getElementById("status").innerText = "Payment Cancelled";
+          },
+          onError: function(error) {
+            document.getElementById("status").innerText = "Error: " + error.message;
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>
